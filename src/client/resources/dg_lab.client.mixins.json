@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "online.kbpf.dg_lab.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ClientPlayerEntityMixin"
+  ],
+  "mixins": [
+    "LivingEntityAccessor",
+    "tick"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

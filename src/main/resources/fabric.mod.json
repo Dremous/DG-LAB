@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "dg_lab",
+  "version": "${version}",
+  "name": "DG_LAB",
+  "description": "",
+  "authors": ["Dremous"],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/dg_lab/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "online.kbpf.dg_lab.client.Dg_labClient"
+    ],
+    "main": [
+      "online.kbpf.dg_lab.Dg_lab"
+    ]
+  },
+  "mixins": [
+    "dg_lab.mixins.json",
+    {
+      "config": "dg_lab.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "~${minecraft_version}"
+  }
+}

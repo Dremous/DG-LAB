@@ -1,0 +1,65 @@
+package online.kbpf.dg_lab.mixin;
+
+
+import online.kbpf.dg_lab.client.Dg_labClient;
+import online.kbpf.dg_lab.client.entity.DGStrength;
+import online.kbpf.dg_lab.client.Config.StrengthConfig;
+import online.kbpf.dg_lab.client.webSocketServer.webSocketServer;
+import net.minecraft.client.player.LocalPlayer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+
+
+
+@Mixin(LocalPlayer.class)
+public abstract class ClientPlayerEntityMixin {
+
+    @Unique
+    private float Dg_labHealth = 0.0f;
+
+    @Inject(method = "hurtTo", at = @At("TAIL"))
+    private void afterSetHealth(float health, CallbackInfo ci) {
+        webSocketServer server = Dg_labClient.webSocketServer;
+        StrengthConfig StrengthConfig = Dg_labClient.strengthConfig;
+        if (server != null && server.getConnected()) {
+            float damage = Dg_labHealth - health;
+
+
+            if (damage > 0.0F) {
+                if (!Dg_labClient.twoPlayerMode) {
+                    server.setDelayTime(StrengthConfig.getADelayTime(), StrengthConfig.getBDelayTime());
+                    if (StrengthConfig.getADamageStrength() > 0)
+                        server.sendStrengthToClient(Math.max(1, ((int) (damage * StrengthConfig.getADamageStrength()))), 1, 1);
+                    if (StrengthConfig.getBDamageStrength() > 0)
+                        server.sendStrengthToClient(Math.max(1, ((int) (damage * StrengthConfig.getBDamageStrength()))), 1, 2);
+                }
+                else {
+                    server.setADelayTime(StrengthConfig.getADelayTime());
+                    if (StrengthConfig.getADamageStrength() > 0)
+                        server.sendStrengthToClient(Math.max(1, ((int) (damage * StrengthConfig.getADamageStrength()))), 1, 1);
+                }
+            }
+            if (health <= 0) {
+                DGStrength dgStrength = server.getStrength();
+                if (!Dg_labClient.twoPlayerMode) {
+                    server.setDelayTime(StrengthConfig.getADeathDelay(), StrengthConfig.getBDeathDelay());
+                    server.sendStrengthToClient((Math.min(dgStrength.getAStrength() + StrengthConfig.getADeathStrength(), dgStrength.getAMaxStrength())), 2, 1);
+                    server.sendStrengthToClient((Math.min(dgStrength.getBStrength() + StrengthConfig.getBDeathStrength(), dgStrength.getBMaxStrength())), 2, 2);
+                }
+                else {
+                    server.setADelayTime(StrengthConfig.getADeathDelay());
+                    server.sendStrengthToClient((Math.min(dgStrength.getAStrength() + StrengthConfig.getADeathStrength(), dgStrength.getAMaxStrength())), 2, 1);
+                }
+            }
+
+            Dg_labHealth = health;
+        }
+
+    }
+
+}
+
